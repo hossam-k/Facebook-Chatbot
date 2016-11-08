@@ -133,8 +133,11 @@ var getWeather = function (location) {
 		    	var jsonData = JSON.parse(body)
 		    	var forecast = jsonData.query.results.channel.item.forecast[0].text
 		      console.log('WEATHER API SAYS....', jsonData.query.results.channel.item.forecast[0].text)
-		      return forecast
+		      resolve(forecast)
 		    }
+				else {
+					reject("failed to get weather")
+				}
 			})
 	})
 }
