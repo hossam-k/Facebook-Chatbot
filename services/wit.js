@@ -37,9 +37,9 @@ var actions = {
 			FB.newMessage(context._fbid_, message)
 		}
 
-		
+
 		cb()
-		
+
 	},
 
 	merge(sessionId, context, entities, message, cb) {
@@ -78,6 +78,7 @@ var actions = {
 
 	// list of functions Wit.ai can execute
 	['fetch-weather'](sessionId, context, cb) {
+		console.log("inside fetch-weather function")
 		// Here we can place an API call to a weather service
 		// if (context.loc) {
 		// 	getWeather(context.loc)
