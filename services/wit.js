@@ -84,15 +84,18 @@ var actions = {
 		 	getWeather(context.loc)
 		 		.then(function (forecast) {
 		 			context.forecast = forecast || 'something wrong'
+					cb(context)
 		 		})
 		 		.catch(function (err) {
 		 			console.log(err)
 		 		})
+		 }else{
+cb(context)
 		 }
 
-		context.forecast = 'Sunny'
 
-		cb(context)
+
+
 	},
 
 	['fetch-pics'](sessionId, context, cb) {
