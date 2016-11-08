@@ -83,7 +83,6 @@ var actions = {
 		 if (context.loc) {
 		 	getWeather(context.loc)
 		 		.then(function (forecast) {
-					console.log("the API returns",forecast)
 		 			context.forecast = forecast || 'something wrong'
 		 		})
 		 		.catch(function (err) {
