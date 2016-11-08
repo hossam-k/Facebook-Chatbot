@@ -90,7 +90,7 @@ var actions = {
 		 		})
 		 }
 
-		context.forecast =forecast
+		context.forecast = 'something wrong'
 
 		cb(context)
 	},
