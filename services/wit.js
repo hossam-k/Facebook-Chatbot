@@ -46,9 +46,9 @@ var actions = {
 		// Reset the weather story
 		delete context.forecast
 		// Retrive the location entity and store it in the context field
-		var loc = firstEntityValue(entities, 'location')
-		if (loc) {
-			context.loc = loc
+		var location = firstEntityValue(entities, 'location')
+		if (location) {
+			context.location = location
 		}
 
 		// Reset the cutepics story
@@ -79,8 +79,8 @@ var actions = {
 	['fetch-weather'](sessionId, context, cb) {
 		console.log("inside fetch-weather function")
 		// Here we can place an API call to a weather service
-		 if (context.loc) {
-		 	getWeather(context.loc)
+		 if (context.location) {
+		 	getWeather(context.location)
 		 		.then(function (forecast) {
 		 			context.forecast = forecast || 'something wrong'
 					console.log("forecast",forecast)
