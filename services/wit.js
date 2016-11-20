@@ -40,19 +40,25 @@ var actions = {
 			FB.newMessage(context._fbid_, message)
 		}
 
-
 		cb()
 
 	},
 
 	merge(sessionId, context, entities, message, cb) {
 		// Reset the weather story
-		//delete context.forecast
-		//delete context.location
+		delete context.forecast
+		delete context.location
+        console.log("context.location : ",context.location)
 		// Retrive the location entity and store it in the context field
 		var location = firstEntityValue(entities, 'location')
 		if (location) {
 			context.location = location
+		}
+
+		//Retrive the dateTime entity and store it in the context field
+		var dateTime =firstEntityValue(entities,'datetime')
+		if(dateTime){
+			context.datetime=dateTime
 		}
 
 
@@ -98,11 +104,10 @@ var actions = {
 			 cb(context)
 		 }
 	 },
-	 //wit function to call the geoDecoder function (getCoordinates)
-	 ['convertAddress'](sessionId, context, cb) {
-		 console.log("inside convertAddress function")
+
+    //wit function to call the geoDecoder function (getCoordinates)
+	['convertAddress'](sessionId, context, cb) {
 			if (context.location) {
-				console.log("inside if");
 				var arr=[]
 			 		getCoordinates(context.location)
 				 		.then(function (arr) {
@@ -126,12 +131,16 @@ var actions = {
 	// },
 
 	['fetch-pic'](sessionId, context, cb) {
-		console.log("inside fetch-pic function")
 		if (context.longitute && context.latitute) {
 		 getPic(context.longitute,context.latitute)
 			 .then(function (pic) {
 				 context.pic = pic || 'something wrong'
 				 console.log("pics =",pic)
+                 //after getting the pic --> resetting the story
+                 delete context.location
+                 delete context.datetime
+                 delete context.longitute
+                 delete context.latitute
 				 cb(context)
 			 })
 			 .catch(function (err) {
@@ -140,15 +149,9 @@ var actions = {
 		}else{
 			cb(context)
 		}
-		cb(context)
+		//cb(context)
 	},
 
-	['reset'](sessionId,context,cb){
-		console.log("inside reset bot function")
-		delete context.location
-		delete context.forecast
-		cb(context)
-	},
 }
 
 // SETUP THE WIT.AI SERVICE
@@ -180,7 +183,6 @@ var getWeather = function (location) {
 		      resolve(forecast)
 		    }
 				else {
-					console.log("inside else in get weather function")
 					reject("failed to get weather")
 				}
 			})
@@ -190,7 +192,6 @@ var getWeather = function (location) {
 //Resolve location to GEO location with longitute and latitute from Google API
 var getCoordinates=function(location){
 	return new Promise (function (resolve,reject) {
-		console.log("inside promise")
 		var url='https://maps.googleapis.com/maps/api/geocode/json?address='+location+'&key=AIzaSyCmnDJHwIEzVrOpeVs-R76-WfXMKGRDtZE'
 		request(url,function(error,response,body) {
 			if(!error && response.statusCode==200) {
@@ -198,12 +199,10 @@ var getCoordinates=function(location){
 				var longitute=jsonData.results[0].geometry.location.lng
 				var latitute=jsonData.results[0].geometry.location.lat
 				var arr=[longitute,latitute]
-				console.log("arr :",arr)
 				resolve(arr)
 			}
 				else {
-					console.log("inside getCoordinates function")
-					reject("cant resolve address to geolocations")
+					reject("can't resolve address to geolocations")
 				}
 		})
 	})
@@ -211,18 +210,17 @@ var getCoordinates=function(location){
 //GET IMAGE FROM NASA API
 var getPic=function (longitute,latitute){
 	return new Promise(function(resolve, reject) {
-		var url='https://api.nasa.gov/planetary/earth/imagery?lon=100.75&lat=1.5&date=2014-02-01&cloud_score=false&api_key=0qJwZLHcZGb42Udsrcn6hj7akL7y4jjRO7bJRGg1'
+        console.log("longitute and latitute :",longitute+',',latitute)
+		var url='https://api.nasa.gov/planetary/earth/imagery?lon='+longitute+'lat='+latitute+'&date='+datetime+'&cloud_score=false&api_key=0qJwZLHcZGb42Udsrcn6hj7akL7y4jjRO7bJRGg1'
 		request (url,function(error,response,body) {
 			if(!error && response.statusCode==200) {
 				var jsonData=JSON.parse(body)
 				var imageURL=jsonData.url
 				var imageDate=jsonData.date
-				console.log("image URL : ",imageURL)
 				console.log("image Date : ",imageDate)
 				resolve(imageURL)
 			}
 			else{
-				console.log("inside else in getPics function")
 				reject("failed to get Pics")
 			}
 		})
@@ -243,18 +241,18 @@ var allPics = {
     'http://i.imgur.com/Q7vn2vS.jpeg',
     'http://i.imgur.com/ZTmF9jm.jpeg',
     'http://i.imgur.com/jJlWH6x.jpeg',
-		'http://i.imgur.com/ZYUakqg.jpeg',
-		'http://i.imgur.com/RxoU9o9.jpeg',
+	'http://i.imgur.com/ZYUakqg.jpeg',
+	'http://i.imgur.com/RxoU9o9.jpeg',
   ],
   racoons: [
     'http://i.imgur.com/zCC3npm.jpeg',
     'http://i.imgur.com/OvxavBY.jpeg',
     'http://i.imgur.com/Z6oAGRu.jpeg',
-		'http://i.imgur.com/uAlg8Hl.jpeg',
-		'http://i.imgur.com/q0O0xYm.jpeg',
-		'http://i.imgur.com/BrhxR5a.jpeg',
-		'http://i.imgur.com/05hlAWU.jpeg',
-		'http://i.imgur.com/HAeMnSq.jpeg',
+	'http://i.imgur.com/uAlg8Hl.jpeg',
+	'http://i.imgur.com/q0O0xYm.jpeg',
+	'http://i.imgur.com/BrhxR5a.jpeg',
+	'http://i.imgur.com/05hlAWU.jpeg',
+	'http://i.imgur.com/HAeMnSq.jpeg',
   ],
   default: [
     'http://blog.uprinting.com/wp-content/uploads/2011/09/Cute-Baby-Pictures-29.jpg',
