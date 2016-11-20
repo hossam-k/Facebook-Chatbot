@@ -8,24 +8,31 @@ var sessions = {}
 
 var findOrCreateSession = function (fbid) {
   var sessionId
+	var breakException={};
 
   // DOES USER SESSION ALREADY EXIST?
+	try{
   Object.keys(sessions).forEach(k => {
+		console.log("fid",typeof(fbid))
+		console.log("sessions :",sessions)
     if (sessions[k].fbid === fbid) {
       // YUP
       sessionId = k
+			console.log("sessionId :",sessionId)
+			throw breakException
     }
   })
+	}
+catch(e){
+	if(e!==breakException)
+	throw e
+}
 
   // No session so we will create one
   if (!sessionId) {
     sessionId = new Date().toISOString()
     sessions[sessionId] = {
-      fbid: fbid,
-      context: {
-        _fbid_: fbid
-      }
-    }
+      fbid: fbid,context: {_fbid_: fbid}}
   }
 
   return sessionId

@@ -4,6 +4,8 @@ var Config = require('../config')
 var FB = require('../connectors/facebook')
 var Wit = require('node-wit').Wit
 var request = require('request')
+const DEFAULT_MAX_STEPS=6
+
 
 
 var firstEntityValue = function (entities, entity) {
@@ -21,6 +23,7 @@ var firstEntityValue = function (entities, entity) {
 
 var actions = {
 	say (sessionId, context, message, cb) {
+		console.log("Message is :",message)
 		// Bot testing mode, run cb() and return
 		if (require.main === module) {
 			cb()
@@ -44,13 +47,14 @@ var actions = {
 
 	merge(sessionId, context, entities, message, cb) {
 		// Reset the weather story
-		delete context.forecast
-		delete context.location
+		//delete context.forecast
+		//delete context.location
 		// Retrive the location entity and store it in the context field
 		var location = firstEntityValue(entities, 'location')
 		if (location) {
 			context.location = location
 		}
+
 
 		// Reset the cutepics story
 		delete context.pics
@@ -91,18 +95,58 @@ var actions = {
 		 			console.log("error",err)
 		 		})
 		 }else{
-cb(context)
+			 cb(context)
 		 }
+	 },
+	 //wit function to call the geoDecoder function (getCoordinates)
+	 ['convertAddress'](sessionId, context, cb) {
+		 console.log("inside convertAddress function")
+			if (context.location) {
+				console.log("inside if");
+				var arr=[]
+			 		getCoordinates(context.location)
+				 		.then(function (arr) {
+					 		context.longitute = arr[0] || 'something wrong'
+							context.latitute= arr[1] || 'something wrong'
+					 		cb(context)
+				 			})
+				 		.catch(function (err) {
+					 		console.log("error",err)
+				 		})
+			 }else{
+				cb(context)
+			}
+	 },
 
+	// ['fetch-pic'](sessionId, context, cb) {
+	// 	var wantedPics = allPics[context.cat || 'default']
+	// 	context.pics = wantedPics[Math.floor(Math.random() * wantedPics.length)]
+	//
+	// 	cb(context)
+	// },
 
-
-
+	['fetch-pic'](sessionId, context, cb) {
+		console.log("inside fetch-pic function")
+		if (context.longitute && context.latitute) {
+		 getPic(context.longitute,context.latitute)
+			 .then(function (pic) {
+				 context.pic = pic || 'something wrong'
+				 console.log("pics =",pic)
+				 cb(context)
+			 })
+			 .catch(function (err) {
+				 console.log("error",err)
+			 })
+		}else{
+			cb(context)
+		}
+		cb(context)
 	},
 
-	['fetch-pics'](sessionId, context, cb) {
-		var wantedPics = allPics[context.cat || 'default']
-		context.pics = wantedPics[Math.floor(Math.random() * wantedPics.length)]
-
+	['reset'](sessionId,context,cb){
+		console.log("inside reset bot function")
+		delete context.location
+		delete context.forecast
 		cb(context)
 	},
 }
@@ -127,18 +171,61 @@ if (require.main === module) {
 // GET WEATHER FROM API
 var getWeather = function (location) {
 	return new Promise(function (resolve, reject) {
-		var url = 'https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20weather.forecast%20where%20woeid%20in%20(select%20woeid%20from%20geo.places(1)%20where%20text%3D%22'+ location +'%22)&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys'
+		var url = 'http://api.openweathermap.org/data/2.5/weather?q='+location+'&APPID=2f530188787a5f9c279e060b23035fb5'
 		request(url, function (error, response, body) {
 		    if (!error && response.statusCode == 200) {
 		    	var jsonData = JSON.parse(body)
-		    	var forecast = jsonData.query.results.channel.item.forecast[0].text
-		      console.log('WEATHER API SAYS....', jsonData.query.results.channel.item.forecast[0].text)
+		    	var forecast = jsonData.weather[0].description
+		      console.log('WEATHER API SAYS....', jsonData.weather[0].description)
 		      resolve(forecast)
 		    }
 				else {
+					console.log("inside else in get weather function")
 					reject("failed to get weather")
 				}
 			})
+	})
+}
+
+//Resolve location to GEO location with longitute and latitute from Google API
+var getCoordinates=function(location){
+	return new Promise (function (resolve,reject) {
+		console.log("inside promise")
+		var url='https://maps.googleapis.com/maps/api/geocode/json?address='+location+'&key=AIzaSyCmnDJHwIEzVrOpeVs-R76-WfXMKGRDtZE'
+		request(url,function(error,response,body) {
+			if(!error && response.statusCode==200) {
+				var jsonData=JSON.parse(body)
+				var longitute=jsonData.results[0].geometry.location.lng
+				var latitute=jsonData.results[0].geometry.location.lat
+				var arr=[longitute,latitute]
+				console.log("arr :",arr)
+				resolve(arr)
+			}
+				else {
+					console.log("inside getCoordinates function")
+					reject("cant resolve address to geolocations")
+				}
+		})
+	})
+}
+//GET IMAGE FROM NASA API
+var getPic=function (longitute,latitute){
+	return new Promise(function(resolve, reject) {
+		var url='https://api.nasa.gov/planetary/earth/imagery?lon=100.75&lat=1.5&date=2014-02-01&cloud_score=false&api_key=0qJwZLHcZGb42Udsrcn6hj7akL7y4jjRO7bJRGg1'
+		request (url,function(error,response,body) {
+			if(!error && response.statusCode==200) {
+				var jsonData=JSON.parse(body)
+				var imageURL=jsonData.url
+				var imageDate=jsonData.date
+				console.log("image URL : ",imageURL)
+				console.log("image Date : ",imageDate)
+				resolve(imageURL)
+			}
+			else{
+				console.log("inside else in getPics function")
+				reject("failed to get Pics")
+			}
+		})
 	})
 }
 
