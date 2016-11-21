@@ -15,13 +15,13 @@ var findOrCreateSession = function (fbid) {
   Object.keys(sessions).forEach(k => {
 		console.log("fid",typeof(fbid))
 		console.log("sessions :",sessions)
-    if (sessions[k].fbid === fbid) {
-      // YUP
-      sessionId = k
+        if (sessions[k].fbid === fbid) {
+            // YUP
+            sessionId = k
 			console.log("sessionId :",sessionId)
 			throw breakException
-    }
-  })
+        }
+      })
 	}
 catch(e){
 	if(e!==breakException)

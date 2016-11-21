@@ -4,9 +4,6 @@ var Config = require('../config')
 var FB = require('../connectors/facebook')
 var Wit = require('node-wit').Wit
 var request = require('request')
-const DEFAULT_MAX_STEPS=6
-
-
 
 var firstEntityValue = function (entities, entity) {
 	var val = entities && entities[entity] &&
@@ -19,7 +16,6 @@ var firstEntityValue = function (entities, entity) {
 	}
 	return typeof val === 'object' ? val.value : val
 }
-
 
 var actions = {
 	say (sessionId, context, message, cb) {
@@ -48,7 +44,7 @@ var actions = {
 		// Reset the weather story
 		delete context.forecast
 		delete context.location
-        console.log("context.location : ",context.location)
+    console.log("context.location : ",context.location)
 		// Retrive the location entity and store it in the context field
 		var location = firstEntityValue(entities, 'location')
 		if (location) {
@@ -61,9 +57,9 @@ var actions = {
 			context.datetime=dateTime
 		}
 
-
 		// Reset the cutepics story
-		delete context.pics
+		delete context.pic
+        console.log("context.pic = ",context.pic)
 
 		// Retrieve the category
 		var category = firstEntityValue(entities, 'category')
@@ -109,14 +105,14 @@ var actions = {
 	['convertAddress'](sessionId, context, cb) {
 			if (context.location) {
 				var arr=[]
-			 		getCoordinates(context.location)
-				 		.then(function (arr) {
-					 		context.longitute = arr[0] || 'something wrong'
-							context.latitute= arr[1] || 'something wrong'
-					 		cb(context)
-				 			})
-				 		.catch(function (err) {
-					 		console.log("error",err)
+			 	getCoordinates(context.location)
+				 	.then(function (arr) {
+					 	context.longitute = arr[0] || 'something wrong'
+						context.latitute= arr[1] || 'something wrong'
+					 	cb(context)
+				 		})
+				 	.catch(function (err) {
+					 	console.log("error",err)
 				 		})
 			 }else{
 				cb(context)
@@ -136,6 +132,7 @@ var actions = {
 			 .then(function (pic) {
 				 context.pic = pic || 'something wrong'
 				 console.log("pics =",pic)
+                 console.log(context.pic)
                  //after getting the pic --> resetting the story
                  delete context.location
                  delete context.datetime
@@ -210,8 +207,8 @@ var getCoordinates=function(location){
 //GET IMAGE FROM NASA API
 var getPic=function (longitute,latitute){
 	return new Promise(function(resolve, reject) {
-        console.log("longitute and latitute :",longitute+',',latitute)
-		var url='https://api.nasa.gov/planetary/earth/imagery?lon='+longitute+'lat='+latitute+'&date='+datetime+'&cloud_score=false&api_key=0qJwZLHcZGb42Udsrcn6hj7akL7y4jjRO7bJRGg1'
+    console.log("longitute and latitute :",longitute+',',latitute)
+		var url='https://api.nasa.gov/planetary/earth/imagery?lon='+longitute+'&lat='+latitute+'&date=2016-02-01&cloud_score=false&api_key=0qJwZLHcZGb42Udsrcn6hj7akL7y4jjRO7bJRGg1'
 		request (url,function(error,response,body) {
 			if(!error && response.statusCode==200) {
 				var jsonData=JSON.parse(body)
@@ -229,7 +226,7 @@ var getPic=function (longitute,latitute){
 
 // CHECK IF URL IS AN IMAGE FILE
 var checkURL = function (url) {
-    return(url.match(/\.(jpeg|jpg|gif|png)$/) != null);
+    return(url.match("https://earthengine.googleapis.com/") != null);
 }
 
 // LIST OF ALL PICS

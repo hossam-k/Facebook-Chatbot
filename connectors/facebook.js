@@ -68,7 +68,19 @@ var newMessage = function (recipientId, msg, atts, cb) {
 				"payload": {
 					"url": msg
 				}
-			}
+			},
+    "quick_replies":[
+      {
+        "content_type":"text",
+        "title":"another location",
+        "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_RED"
+      },
+      {
+        "content_type":"text",
+        "title":"thanks",
+        "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_GREEN"
+      }
+    ]
 		}
 	} else {
 		var message = {
