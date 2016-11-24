@@ -30,21 +30,26 @@ var actions = {
 		console.log('WIT HAS SOMETHING TO SAY:', message)
 		console.log('WIT HAS A CONTEXT:', context)
 
-		if (checkURL(message)) {
-			FB.newMessage(context._fbid_, message, true)
-		} else {
-			FB.newMessage(context._fbid_, message)
+		if (checkURL(message)==1) {
+			FB.newMessage(context._fbid_, message, false,true)
+		} else if(checkURL(message)==2) {
+            FB.newMessage(context._fbid_, message, true,false)
 		}
+        else {
+            FB.newMessage(context._fbid_, message)
+        }
 
 		cb()
 
 	},
 
 	merge(sessionId, context, entities, message, cb) {
-		// Reset the weather story
+		//Reset the weather story
 		delete context.forecast
 		delete context.location
-    console.log("context.location : ",context.location)
+    //Reset NASA picture story
+    delete context.pic
+
 		// Retrive the location entity and store it in the context field
 		var location = firstEntityValue(entities, 'location')
 		if (location) {
@@ -55,16 +60,6 @@ var actions = {
 		var dateTime =firstEntityValue(entities,'datetime')
 		if(dateTime){
 			context.datetime=dateTime
-		}
-
-		// Reset the cutepics story
-		delete context.pic
-        console.log("context.pic = ",context.pic)
-
-		// Retrieve the category
-		var category = firstEntityValue(entities, 'category')
-		if (category) {
-			context.cat = category
 		}
 
 		// Retrieve the sentiment
@@ -148,6 +143,15 @@ var actions = {
 		}
 		//cb(context)
 	},
+    ['reset'](sessionId, context, cb) {
+        console.log("inside reset function")
+        delete context.location
+        delete context.longitute
+        delete context.latitute
+        delete context.pic
+				delete context.forecast
+        cb(context)
+     },
 
 }
 
@@ -226,7 +230,17 @@ var getPic=function (longitute,latitute){
 
 // CHECK IF URL IS AN IMAGE FILE
 var checkURL = function (url) {
-    return(url.match("https://earthengine.googleapis.com/") != null);
+    //check if message is a welcome MESSAGE
+    if(url.match("hi :D i am espace Chatbot , iam still young dont ask me hard questions. pick one of the replies to get going")){
+        return 1
+    //check if message is a returned pic From Nasa API
+    }else if (url.match("https://earthengine.googleapis.com/")!= null){
+        return 2
+    }
+    //check if message is a text MESSAGE
+    else {
+        return 3
+    }
 }
 
 // LIST OF ALL PICS
@@ -238,19 +252,19 @@ var allPics = {
     'http://i.imgur.com/Q7vn2vS.jpeg',
     'http://i.imgur.com/ZTmF9jm.jpeg',
     'http://i.imgur.com/jJlWH6x.jpeg',
-	'http://i.imgur.com/ZYUakqg.jpeg',
-	'http://i.imgur.com/RxoU9o9.jpeg',
+		'http://i.imgur.com/ZYUakqg.jpeg',
+		'http://i.imgur.com/RxoU9o9.jpeg',
   ],
   racoons: [
     'http://i.imgur.com/zCC3npm.jpeg',
     'http://i.imgur.com/OvxavBY.jpeg',
     'http://i.imgur.com/Z6oAGRu.jpeg',
-	'http://i.imgur.com/uAlg8Hl.jpeg',
-	'http://i.imgur.com/q0O0xYm.jpeg',
-	'http://i.imgur.com/BrhxR5a.jpeg',
-	'http://i.imgur.com/05hlAWU.jpeg',
-	'http://i.imgur.com/HAeMnSq.jpeg',
-  ],
+		'http://i.imgur.com/uAlg8Hl.jpeg',
+		'http://i.imgur.com/q0O0xYm.jpeg',
+		'http://i.imgur.com/BrhxR5a.jpeg',
+		'http://i.imgur.com/05hlAWU.jpeg',
+		'http://i.imgur.com/HAeMnSq.jpeg',
+  	],
   default: [
     'http://blog.uprinting.com/wp-content/uploads/2011/09/Cute-Baby-Pictures-29.jpg',
   ],

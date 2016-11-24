@@ -17,7 +17,7 @@ var newRequest = request.defaults({
 })
 
 // SETUP A MESSAGE FOR THE FACEBOOK REQUEST
-var newMessage = function (recipientId, msg, atts, cb) {
+var newMessage = function (recipientId, msg, atts,attsWelcomeMessage, cb) {
 	var opts = {
 		form: {
 			recipient: {
@@ -69,20 +69,38 @@ var newMessage = function (recipientId, msg, atts, cb) {
 					"url": msg
 				}
 			},
-    "quick_replies":[
-      {
-        "content_type":"text",
-        "title":"another location",
-        "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_RED"
-      },
-      {
-        "content_type":"text",
-        "title":"thanks",
-        "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_GREEN"
-      }
-    ]
+            "quick_replies":[
+                {
+                    "content_type":"text",
+                    "title":"another location",
+                    "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_RED"
+                },
+                {
+                    "content_type":"text",
+                    "title":"thanks",
+                    "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_GREEN"
+                }
+            ]
 		}
-	} else {
+	}
+	else if (attsWelcomeMessage) {
+		var message = {
+			text: msg,
+            "quick_replies":[
+                {
+                    "content_type":"text",
+                    "title":"weather in places",
+                    "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_RED"
+                },
+                {
+                    "content_type":"text",
+                    "title":"Eyes through NASA",
+                    "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_GREEN"
+                }
+            ]
+		}
+	}
+	else {
 		var message = {
 			text: msg
 		}
