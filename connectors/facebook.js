@@ -77,7 +77,12 @@ var newMessage = function (recipientId, msg, atts,attsWelcomeMessage, cb) {
                 },
                 {
                     "content_type":"text",
-                    "title":"thanks",
+                    "title":"Like",
+                    "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_GREEN"
+                },
+								{
+                    "content_type":"text",
+                    "title":"Dislike",
                     "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_GREEN"
                 }
             ]
@@ -89,7 +94,7 @@ var newMessage = function (recipientId, msg, atts,attsWelcomeMessage, cb) {
             "quick_replies":[
                 {
                     "content_type":"text",
-                    "title":"weather in places",
+                    "title":"Daily Weather",
                     "payload":"DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_RED"
                 },
                 {
